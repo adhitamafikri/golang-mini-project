@@ -1,48 +1,49 @@
-package services
+package service
 
 import (
 	"sync"
-	"github.com/jinzhu/copier"
-	httpEntity "../entity/http"
-	dbEntity "../entity/db"
+
 	APIEntity "../entity/api"
-	repository "../repository/db"
+	dbEntity "../entity/db"
+	httpEntity "../entity/http"
 	repositoryAPI "../repository/api"
+	repository "../repository/db"
+	"github.com/jinzhu/copier"
 )
 
 type UserService struct {
-	userRepository repository.UserRepositoryInterface
+	userRepository    repository.UserRepositoryInterface
 	userRepositoryAPI repositoryAPI.FriendAPIRepositoryInterface
 }
 
 func UserServiceHandler() UserService {
 	return UserService{
-		userRepository: repository.UserRepositoryHandler(),
+		userRepository:    repository.UserRepositoryHandler(),
 		userRepositoryAPI: repositoryAPI.ThirdPartyAPIHandler(),
 	}
 }
 
 type UserServiceInterface interface {
 	GetUserByID(id int) httpEntity.UserDetailResponse
-	GetAllUser(page int,count int) []httpEntity.UserResponse
+	GetAllUser(page int, count int) []httpEntity.UserResponse
 	UpdateUserByID(id int) bool
 }
 
-func (service *UserService) GetUserByID(id int, waitGroup *sync.WaitGroup) *httpEntity.UserDetailResponse{
+func (service *UserService) GetUserByID(id int, waitGroup *sync.WaitGroup) *httpEntity.UserDetailResponse {
 	waitGroup.Add(1)
 	user := &dbEntity.User{}
-	go service.userRepository.GetUserByID(id,user,waitGroup)
+	go service.userRepository.GetUserByID(id, user, waitGroup)
 
 	waitGroup.Add(1)
 	friend := &APIEntity.FriendResponse{}
-	go service.userRepositoryAPI.GetFriendID(id,friend,waitGroup)
-	
+	go service.userRepositoryAPI.GetFriendID(id, friend, waitGroup)
+
 	waitGroup.Wait()
 
 	result := &httpEntity.UserDetailResponse{}
 	if user != nil {
 		copier.Copy(result, user)
-		if nil != user.UserStatus{
+		if nil != user.UserStatus {
 			result.Status = &user.UserStatus.Name
 		}
 		if friend != nil {
@@ -52,8 +53,8 @@ func (service *UserService) GetUserByID(id int, waitGroup *sync.WaitGroup) *http
 	return result
 }
 
-func (service *UserService) GetAllUser(page int,count int) []httpEntity.UserResponse {
-	users, _ := service.userRepository.GetUsersList(page,count)
+func (service *UserService) GetAllUser(page int, count int) []httpEntity.UserResponse {
+	users, _ := service.userRepository.GetUsersList(page, count)
 	result := []httpEntity.UserResponse{}
 	copier.Copy(&result, &users)
 	return result

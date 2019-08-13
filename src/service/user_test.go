@@ -1,13 +1,13 @@
-package services
+package service
 
 import (
 	"fmt"
-	"testing"
 	"sync"
+	"testing"
 )
 import (
-	modelDB "../entity/db"
 	modelAPI "../entity/api"
+	modelDB "../entity/db"
 	modelHttp "../entity/http"
 )
 import (
@@ -34,7 +34,7 @@ func (repository *repositoryDBMock) GetUserByID(id int, userData *modelDB.User, 
 }
 
 func (repository *repositoryDBMock) UpdateUserByID(id int, userData *modelDB.User) error {
-	repository.Called(id,userData)
+	repository.Called(id, userData)
 	userData.ID = uint(id)
 	userData.Name = fmt.Sprintf("Updated - %s", userData.Name)
 	userData.IDCardNumber = fmt.Sprintf("Updated - %s", userData.IDCardNumber)
@@ -43,30 +43,30 @@ func (repository *repositoryDBMock) UpdateUserByID(id int, userData *modelDB.Use
 }
 
 func (repository *repositoryDBMock) GetUsersList(limit int, offset int) ([]modelDB.User, error) {
-	repository.Called(limit,offset)
+	repository.Called(limit, offset)
 	users := []modelDB.User{}
 	const (
-	    ID1 = iota + 1
-	    ID2
-	    ID3
+		ID1 = iota + 1
+		ID2
+		ID3
 	)
 	users = append(users, modelDB.User{
-		ID: uint(ID1),
-		Name: "Test Name ONE",
+		ID:           uint(ID1),
+		Name:         "Test Name ONE",
 		IDCardNumber: "IDCARD123456789 ONE",
-		Address: "Street Test Number 69 ONE",
+		Address:      "Street Test Number 69 ONE",
 	})
 	users = append(users, modelDB.User{
-		ID: uint(ID2),
-		Name: "Test Name TWO",
+		ID:           uint(ID2),
+		Name:         "Test Name TWO",
 		IDCardNumber: "IDCARD123456789 TWO",
-		Address: "Street Test Number 69 TWO",
+		Address:      "Street Test Number 69 TWO",
 	})
 	users = append(users, modelDB.User{
-		ID: uint(ID3),
-		Name: "Test Name THREE",
+		ID:           uint(ID3),
+		Name:         "Test Name THREE",
 		IDCardNumber: "IDCARD123456789 THREE",
-		Address: "Street Test Number 69 THREE",
+		Address:      "Street Test Number 69 THREE",
 	})
 	return users, nil
 }
@@ -75,7 +75,7 @@ type repositoryAPIMock struct {
 	mock.Mock
 }
 
-func (apiMock *repositoryAPIMock) GetFriendID(id int, friendResponse *modelAPI.FriendResponse, wg *sync.WaitGroup) error{
+func (apiMock *repositoryAPIMock) GetFriendID(id int, friendResponse *modelAPI.FriendResponse, wg *sync.WaitGroup) error {
 	// apiMock.Called(id, friendResponse, wg)
 	friendResponse.Data.ID = id
 	friendResponse.Data.Email = "david.beckham@mail.com"
@@ -92,14 +92,14 @@ func TestUserServiceGetUserByIDMocked(t *testing.T) {
 	dbMockData := repositoryDBMock{}
 	apiMockData := repositoryAPIMock{}
 	wg := &sync.WaitGroup{}
-	
+
 	user := &modelDB.User{}
 	friend := &modelAPI.FriendResponse{}
 	var testId int = 1
 	dbMockData.On("GetUserByID", testId, user, wg).Return(nil)
 	apiMockData.On("GetFriendID", testId, friend, wg).Return(nil)
-	
-	userService := UserService{&dbMockData,&apiMockData}
+
+	userService := UserService{&dbMockData, &apiMockData}
 	resultFuncService := userService.GetUserByID(testId, wg)
 	// fmt.Println(user)
 	// fmt.Println(friend)
@@ -118,7 +118,7 @@ func TestUserServiceGetAllUserMocked(t *testing.T) {
 	limit := 1
 	offset := 3
 	dbMockData.On("GetUsersList", limit, offset).Return([]modelDB.User{}, nil)
-	userService := UserService{&dbMockData,&apiMockData}
+	userService := UserService{&dbMockData, &apiMockData}
 	resultFuncService := userService.GetAllUser(limit, offset)
 	assert.Equal(t, len(resultFuncService), 3, "It should be same length as Mock Data")
 	assert.Equal(t, resultFuncService[0].Name, "Test Name ONE", "It should be same NAME as Mock Data")
@@ -132,15 +132,15 @@ func TestUserServiceUpdateUserByIDMocked(t *testing.T) {
 	apiMockData := repositoryAPIMock{}
 	var testId int = 1
 	dbMockData.On("UpdateUserByID", testId, &modelDB.User{
-		Name: "Test Update",
+		Name:         "Test Update",
 		IDCardNumber: "IDCARDUPDATE1213243",
-		Address: "Adress Update 96",
+		Address:      "Adress Update 96",
 	}).Return(nil)
-	userService := UserService{&dbMockData,&apiMockData}
+	userService := UserService{&dbMockData, &apiMockData}
 	resultFuncService := userService.UpdateUserByID(testId, modelHttp.UserRequest{
-		Name: "Test Update",
+		Name:         "Test Update",
 		IDCardNumber: "IDCARDUPDATE1213243",
-		Address: "Adress Update 96",
+		Address:      "Adress Update 96",
 	})
 	assert.Equal(t, resultFuncService, true, "It should be true")
 }

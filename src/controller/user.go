@@ -1,16 +1,17 @@
 package controller
 
 import (
+	"fmt"
+	"net/http"
 	"strconv"
 	"sync"
+
+	"../service"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	services "../service"
-	"fmt"
 )
 
 type UserController struct {
-	UserService services.UserService
+	UserService service.UserService
 }
 
 func (handler *UserController) TestFunction(context *gin.Context) {
@@ -34,10 +35,11 @@ func (service *UserController) GetUserByID(context *gin.Context) {
 	context.JSON(http.StatusOK, result)
 }
 
-type Limitofset struct{
-	Limit int `form:"limit"`
+type Limitofset struct {
+	Limit  int `form:"limit"`
 	Offset int `form:"offset"`
 }
+
 func (service *UserController) GetUsers(context *gin.Context) {
 	queryparam := Limitofset{}
 	err := context.ShouldBindQuery(&queryparam)
@@ -61,4 +63,4 @@ func (service *UserController) UpdateUsersByID(context *gin.Context) {
 	fmt.Println(id)
 	// result := service.UserService.GetAllUser(queryparam.Limit, queryparam.Offset)
 	context.JSON(http.StatusOK, nil)
-} 
+}

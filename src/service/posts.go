@@ -27,3 +27,10 @@ func (service *PostsService) GetAllPosts() []httpEntity.PostsResponse {
 	copier.Copy(&result, &posts)
 	return result
 }
+
+func (service *PostsService) GetPostsByUserID(userID int) []httpEntity.PostsResponse {
+	posts, _ := service.postsRepository.GetPostsByUserID(userID, 10, 0)
+	result := []httpEntity.PostsResponse{}
+	copier.Copy(&result, &posts)
+	return result
+}

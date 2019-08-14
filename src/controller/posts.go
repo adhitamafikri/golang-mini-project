@@ -17,8 +17,7 @@ func (handler *PostsController) Index(context *gin.Context) {
 	})
 }
 
-func (handler *PostsController) GetUserPosts(context *gin.Context) {
-	context.JSON(http.StatusOK, gin.H{
-		"message": "Getting all user's posts",
-	})
+func (handler *PostsController) GetAllPosts(context *gin.Context) {
+	results := handler.PostsService.GetAllPosts()
+	context.JSON(http.StatusOK, results)
 }
